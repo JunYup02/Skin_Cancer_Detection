@@ -3,8 +3,7 @@ from pydantic import BaseModel
 
 class AnalyzeResponse(BaseModel):
     predicted_class: str
-    label_ko: str
-    label_en: str
+    label: str
     confidence: float
     probabilities: dict[str, float]
     risk_level: str

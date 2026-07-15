@@ -51,11 +51,12 @@ export default function App() {
         <div className="max-w-2xl mx-auto px-4 py-6">
           <h1 className="text-2xl font-bold text-slate-900">🩺 Skin Cancer Detector (Demo)</h1>
           <p className="text-sm text-slate-500 mt-1">
-            피부 병변 사진을 업로드하면 AI가 7가지 병변 유형 중 하나로 분류하고, 위험도에 따른 안내를 제공합니다.
+            Upload a photo of a skin lesion and the AI will classify it into one of 7 lesion
+            types, with risk-based guidance.
           </p>
           <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 mt-3 font-medium">
-            ⚠️ 본 서비스는 데모용이며 실제 의료 진단이 아닙니다. 결과는 참고용으로만 사용하고,
-            중요한 판단은 반드시 피부과 전문의와 상담하세요.
+            ⚠️ This is a demo service, not a real medical diagnosis. Use the results for
+            reference only, and always consult a dermatologist for important decisions.
           </p>
         </div>
       </header>
@@ -74,8 +75,9 @@ export default function App() {
       </main>
 
       <footer className="max-w-2xl mx-auto px-4 pb-8 text-xs text-slate-400">
-        본 서비스의 분류 모델은 합성 데이터로 학습된 데모 모델이며, 실제 임상 데이터로 검증되지 않았습니다.
-        의학적 진단을 대체할 수 없습니다.
+        The classification model behind this service is a demo model trained on synthetic
+        data and has not been validated on real clinical data. It cannot replace a medical
+        diagnosis.
       </footer>
     </div>
   );

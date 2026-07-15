@@ -21,12 +21,12 @@ def check_image_quality(image: Image.Image) -> list[str]:
 
     width, height = image.size
     if width < MIN_DIMENSION or height < MIN_DIMENSION:
-        warnings.append(f"이미지 해상도가 낮습니다 ({width}x{height}). 더 선명한 사진을 사용해주세요.")
+        warnings.append(f"Image resolution is low ({width}x{height}). Please use a higher-resolution photo.")
 
     gray = np.asarray(image.convert("L"), dtype=np.float64)
     laplacian = ndimage.convolve(gray, LAPLACIAN_KERNEL)
     sharpness = laplacian.var()
     if sharpness < BLUR_VARIANCE_THRESHOLD:
-        warnings.append("이미지가 흐릿해 보입니다. 초점이 맞는 사진으로 다시 촬영해주세요.")
+        warnings.append("The image looks blurry. Please retake a clearer, in-focus photo.")
 
     return warnings
