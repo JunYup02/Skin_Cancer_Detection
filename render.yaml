@@ -8,3 +8,13 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: PREDICTOR_BACKEND
+        value: local
+      - key: VERTEX_PROJECT_ID
+        sync: false
+      - key: VERTEX_LOCATION
+        sync: false
+      - key: VERTEX_ENDPOINT_ID
+        sync: false
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false

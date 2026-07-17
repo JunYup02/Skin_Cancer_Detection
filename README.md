@@ -26,16 +26,38 @@ PDF 리포트로 다운로드할 수 있다. (PRD.md 참고)
 **즉 이 분류 결과는 실제 임상 데이터로 검증되지 않았으며, 의학적 진단으로 사용해서는 안 된다.**
 프론트엔드와 PDF 리포트에 이 사실을 명시하고 있다.
 
-### Vertex AI로 교체하기
+### Vertex AI 연동
 
-`backend/app/predictor.py`에 `Predictor` 추상 클래스와 `LocalDemoPredictor`(현재 기본값),
-`VertexAIPredictor`(스텁) 가 이미 준비되어 있다. 실제 HAM10000으로 학습한 모델을 Vertex AI에
-배포한 뒤:
+`backend/app/predictor.py`에 `Predictor` 추상 클래스와 `LocalDemoPredictor`(기본값),
+`VertexAIPredictor`(AutoML 이미지 분류 엔드포인트 호출 구현 완료)가 준비되어 있다.
+[Vertex AI 이미지 분류 예측 샘플](https://github.com/googleapis/python-aiplatform/blob/main/samples/snippets/prediction_service/predict_image_classification_sample.py)
+과 동일한 방식(`aiplatform.gapic.PredictionServiceClient` + `ImageClassificationPredictionInstance`)으로
+호출하며, 응답의 `displayNames`/`confidences`를 `app/classes.py`의 `CLASS_ORDER` 7개 클래스 코드에 매핑한다.
+
+**전제 조건:** Vertex AI(AutoML Vision)에 배포한 모델의 라벨명이 `CLASS_ORDER`의 클래스 코드
+(`akiec`, `bcc`, `bkl`, `df`, `mel`, `nv`, `vasc`)와 정확히 일치해야 한다. 다르면 해당 클래스는
+확률 0으로 처리된다.
+
+실제 Vertex AI 엔드포인트를 사용하려면:
 
 1. `PREDICTOR_BACKEND=vertex` 환경변수 설정
-2. `VERTEX_PROJECT_ID`, `VERTEX_LOCATION`, `VERTEX_ENDPOINT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 설정
-3. `google-cloud-aiplatform`을 `requirements.txt`에 추가
-4. `VertexAIPredictor.predict()` 안에서 엔드포인트 호출 로직 구현 (docstring에 안내 있음)
+2. `VERTEX_PROJECT_ID`, `VERTEX_LOCATION`(예: `us-central1`), `VERTEX_ENDPOINT_ID` 설정
+3. `GOOGLE_APPLICATION_CREDENTIALS`를 서비스 계정 키 JSON 파일 경로로 설정
+   - Render에서는 "Secret Files" 기능으로 키 JSON을 업로드하고, 그 마운트 경로를
+     `GOOGLE_APPLICATION_CREDENTIALS`로 지정한다 (`render.yaml`에 관련 env var는
+     `sync: false`로 이미 등록되어 있어 대시보드에서 값만 채우면 된다).
+4. `pip install -r backend/requirements.txt`로 `google-cloud-aiplatform` 설치
+
+로컬에서 확인하려면:
+
+```bash
+export PREDICTOR_BACKEND=vertex
+export VERTEX_PROJECT_ID=<project-id>
+export VERTEX_LOCATION=us-central1
+export VERTEX_ENDPOINT_ID=<endpoint-id>
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+uvicorn app.main:app --reload --port 8000
+```
 
 ## 로컬 실행
 
