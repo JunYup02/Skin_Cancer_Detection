@@ -5,4 +5,3 @@ google-cloud-aiplatform
 pillow
 python-multipart
 python-dotenv
-httpx

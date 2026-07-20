@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
 from app.api.routes.gemini_report import router as gemini_report_router
-from app.api.routes.hospitals import router as hospitals_router
 
 router = APIRouter(prefix="/api")
 
@@ -9,4 +8,3 @@ router = APIRouter(prefix="/api")
 # from app.api.routes.<feature> import router as <feature>_router
 # router.include_router(<feature>_router)
 router.include_router(gemini_report_router)
-router.include_router(hospitals_router)

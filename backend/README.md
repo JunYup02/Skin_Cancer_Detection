@@ -34,10 +34,3 @@ cp .env.example .env
 - `VERTEX_PROJECT_ID`, `VERTEX_LOCATION` (e.g. `us-central1`), `VERTEX_ENDPOINT_ID` — the deployed
   Vertex AI AutoML image-classification endpoint
 - `GOOGLE_APPLICATION_CREDENTIALS` — path to a GCP service account key JSON with Vertex AI access
-
-`GET /api/hospitals/nearby?lat=&lng=` (nearby dermatology clinics/hospitals) needs:
-
-- `GOOGLE_PLACES_API_KEY` — a Google Places API (New) key. The field mask only requests
-  Nearby Search **Pro**-tier fields (cheaper) — no `rating`, `userRatingCount`, or
-  `currentOpeningHours`, since those bill under the pricier "Nearby Search Enterprise" SKU.
-  Add them in `app/services/places.py` if that cost is acceptable later.
