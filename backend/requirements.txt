@@ -1,7 +1,2 @@
 fastapi
 uvicorn[standard]
-google-genai
-google-cloud-aiplatform
-pillow
-python-multipart
-python-dotenv
