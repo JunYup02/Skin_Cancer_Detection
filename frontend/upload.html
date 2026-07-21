@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dermalyze — Upload photo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-frame">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" data-nav-back="body-part.html" aria-label="Go back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <img class="topbar-logo" src="assets/images/logo.png" alt="">
+        <span class="topbar-title">Dermalyze</span>
+      </div>
+      <button class="avatar-btn" data-account-btn aria-label="Account">
+        <span class="material-symbols-outlined">account_circle</span>
+      </button>
+    </header>
+
+    <main class="screen" style="padding-bottom: 100px;">
+      <div class="stepper">
+        <div class="stepper-row">
+          <span class="text-label-md text-primary uppercase-label">Step 2 of 3 — Photo</span>
+          <span class="text-label-sm text-outline">67%</span>
+        </div>
+        <div class="stepper-track"><div class="stepper-fill" style="width: 67%;"></div></div>
+      </div>
+
+      <div id="region-chip" class="badge badge-success" style="align-self:flex-start;">
+        <span class="material-symbols-outlined" style="font-size:16px;">location_on</span>
+        <span id="region-chip-label">—</span>
+      </div>
+
+      <section style="display:flex; flex-direction:column; gap: var(--stack-gap);">
+        <h2 class="text-headline-sm" style="margin:0;">Upload photo</h2>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-grid">
+            <label class="dropzone-cell" for="camera-input">
+              <span class="material-symbols-outlined">photo_camera</span>
+              <strong>Take photo</strong>
+            </label>
+            <label class="dropzone-cell" for="file-input">
+              <span class="material-symbols-outlined">image</span>
+              <strong>Upload</strong>
+              <small>JPG, PNG, max 10MB</small>
+            </label>
+          </div>
+        </div>
+        <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+        <input type="file" id="file-input" accept="image/*" class="hidden">
+
+        <div id="preview-wrap" class="hidden">
+          <div class="preview-frame">
+            <img id="preview-img" alt="Selected lesion photo">
+            <span class="preview-badge" id="region-chip-2">
+              <span class="material-symbols-outlined" style="font-size:16px;">location_on</span>
+              <span id="region-chip-label-2">—</span>
+            </span>
+            <button class="preview-remove" id="remove-photo" aria-label="Remove photo" type="button">
+              <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-soft" style="display:flex; gap:12px; border-radius: var(--radius-lg); padding: 14px;">
+          <span class="material-symbols-outlined text-primary">info</span>
+          <p class="text-body-md" style="margin:0; color: var(--on-primary-container, var(--on-surface));">For an accurate read, use a clear, well-lit, close-up photo of the lesion.</p>
+        </div>
+      </section>
+
+      <section style="display:flex; flex-direction:column; gap: var(--stack-gap);">
+        <h3 class="text-label-md text-outline uppercase-label" style="margin:0;">Before you shoot</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="card-soft" style="border-radius: var(--radius-lg); padding: 14px; display:flex; flex-direction:column; gap:8px; align-items:flex-start;">
+            <span class="material-symbols-outlined icon-filled text-primary">check_circle</span>
+            <p class="text-body-md" style="margin:0;">Bright, even lighting; camera held steady and in focus</p>
+          </div>
+          <div class="card-soft" style="border-radius: var(--radius-lg); padding: 14px; display:flex; flex-direction:column; gap:8px; align-items:flex-start; background: var(--error-container); border-color: transparent;">
+            <span class="material-symbols-outlined icon-filled text-error">cancel</span>
+            <p class="text-body-md" style="margin:0; color: var(--on-error-container);">Blurry, dark, or shadowed shots — retake if in doubt</p>
+          </div>
+        </div>
+      </section>
+
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; color: var(--outline); padding: 4px 0;">
+        <span class="material-symbols-outlined" style="font-size:16px;">lock</span>
+        <p class="text-label-sm" style="margin:0;">Your photo is sent directly to the analysis endpoint over HTTPS</p>
+      </div>
+
+      <div id="upload-error" class="banner banner-error hidden">
+        <span class="material-symbols-outlined">error</span>
+        <span></span>
+      </div>
+    </main>
+
+    <footer style="position: sticky; bottom: 0; background: var(--surface-container-lowest); border-top: 1px solid var(--outline-variant); padding: 16px;">
+      <button id="analyze-btn" class="btn btn-primary btn-block" disabled>
+        Start analysis
+        <span class="material-symbols-outlined" style="font-size:18px;">analytics</span>
+      </button>
+    </footer>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/upload.js"></script>
+</body>
+</html>

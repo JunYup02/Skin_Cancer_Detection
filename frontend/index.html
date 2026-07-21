@@ -1,13 +1,105 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dermalyze</title>
+  <title>Dermalyze — Log in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body.auth-body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background:
+        radial-gradient(at 0% 0%, rgba(43, 179, 168, 0.10) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(152, 71, 37, 0.05) 0px, transparent 50%),
+        var(--background);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 12px 24px rgba(0,0,0,0.06);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .auth-logo { height: 72px; width: 72px; object-fit: contain; margin-bottom: 12px; border-radius: var(--radius-lg); }
+    .auth-header { text-align: center; margin-bottom: var(--section-gap); }
+    .auth-form { width: 100%; display: flex; flex-direction: column; gap: 18px; }
+    .auth-footer { margin-top: 28px; text-align: center; font-size: 14px; color: var(--on-surface-variant); }
+  </style>
 </head>
-<body>
+<body class="auth-body">
+  <main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div class="auth-card">
+      <img class="auth-logo" src="assets/images/logo.png" alt="Dermalyze logo">
+      <div class="auth-header">
+        <h1 class="text-headline-md" style="margin: 0 0 4px;">Dermalyze</h1>
+        <p class="text-body-md text-outline">Your AI Skin Health Partner</p>
+      </div>
 
-  <script src="js/main.js"></script>
+      <div id="login-success-note" class="banner banner-error hidden" style="background: color-mix(in srgb, var(--primary-container) 18%, transparent); color: var(--on-primary-container); margin-bottom: 4px;">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span>Account created — log in to continue.</span>
+      </div>
+      <div id="login-error" class="banner banner-error hidden">
+        <span class="material-symbols-outlined">error</span>
+        <span></span>
+      </div>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="field">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <span class="material-symbols-outlined">person</span>
+            <input id="username" name="username" type="text" placeholder="Enter your username" autocomplete="username" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap has-trailing">
+            <span class="material-symbols-outlined">lock</span>
+            <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+            <button class="input-trailing-btn" type="button" id="toggle-password" aria-label="Show password">
+              <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="remember">
+          <label for="remember">Keep me logged in on this device</label>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">
+          Log in
+          <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account?
+        <a href="signup.html" style="color: var(--primary); font-weight: 700; text-decoration: none;">Sign up</a>
+      </div>
+    </div>
+
+    <div class="system-status">
+      <div class="dot"><span class="pulse"></span>Frontend ready</div>
+      <div class="dot"><span class="material-symbols-outlined" style="font-size:14px;">verified_user</span>Session stored locally</div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>

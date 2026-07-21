@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dermalyze — Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-frame">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" data-nav-back="dashboard.html" aria-label="Go back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <span class="topbar-title">Support</span>
+      </div>
+      <button class="avatar-btn" data-account-btn aria-label="Account">
+        <span class="material-symbols-outlined">account_circle</span>
+      </button>
+    </header>
+
+    <main class="screen">
+      <div class="card">
+        <h2 class="text-headline-sm" style="margin:0 0 6px;">How Dermalyze works</h2>
+        <div style="display:flex; flex-direction:column; gap:14px; margin-top:12px;">
+          <div style="display:flex; gap:12px;">
+            <span class="material-symbols-outlined text-primary">looks_one</span>
+            <p class="text-body-md" style="margin:0;">Pick the body area the lesion is on, front or back.</p>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <span class="material-symbols-outlined text-primary">looks_two</span>
+            <p class="text-body-md" style="margin:0;">Upload or photograph a clear, well-lit close-up.</p>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <span class="material-symbols-outlined text-primary">looks_3</span>
+            <p class="text-body-md" style="margin:0;">The photo is classified by a Vertex AI image model, and Gemini writes a plain-language summary of the result.</p>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <span class="material-symbols-outlined text-primary">looks_4</span>
+            <p class="text-body-md" style="margin:0;">For higher-risk results, Dermalyze can look up nearby dermatology clinics using your device location.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-headline-sm" style="margin:0 0 6px;">Frequently asked</h2>
+        <details style="margin-top:10px;">
+          <summary class="text-body-lg" style="cursor:pointer; font-weight:600;">Is this a medical diagnosis?</summary>
+          <p class="text-body-md text-on-surface-variant" style="margin: 8px 0 0;">No. Dermalyze is an informational AI tool, not a substitute for a licensed dermatologist. Always seek professional care for any concerning lesion.</p>
+        </details>
+        <details style="margin-top:14px;">
+          <summary class="text-body-lg" style="cursor:pointer; font-weight:600;">Why does the analysis sometimes fail?</summary>
+          <p class="text-body-md text-on-surface-variant" style="margin: 8px 0 0;">The classification step calls a Vertex AI endpoint that has to be deployed and configured by the Dermalyze team. If it isn't connected yet, you'll see a clear notice on the upload screen instead of a broken result.</p>
+        </details>
+        <details style="margin-top:14px;">
+          <summary class="text-body-lg" style="cursor:pointer; font-weight:600;">Is my photo stored?</summary>
+          <p class="text-body-md text-on-surface-variant" style="margin: 8px 0 0;">Your photo is sent directly to the analysis endpoint for classification. It is not saved to your account or displayed to other users.</p>
+        </details>
+      </div>
+
+      <div class="disclaimer">
+        <span class="material-symbols-outlined">info</span>
+        <p>This AI-generated analysis is for informational purposes only and is not a clinical diagnosis. Always consult a licensed dermatologist for medical advice before making any health-related decisions.</p>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <a class="nav-item" href="dashboard.html">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="label">Dashboard</span>
+      </a>
+      <a class="nav-item" href="hospitals.html">
+        <span class="material-symbols-outlined">medical_services</span>
+        <span class="label">Clinics</span>
+      </a>
+      <a class="nav-item active" href="support.html">
+        <span class="material-symbols-outlined">help_center</span>
+        <span class="label">Support</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    requireAuth();
+  </script>
+</body>
+</html>

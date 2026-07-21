@@ -54,3 +54,23 @@ cp .env.example .env
 Auth uses `HTTPBearer`: call `POST /api/auth/login`, then paste the returned `access_token`
 into Swagger's Authorize popup (single "Value" field, no username/password form) to call
 `POST /api/lesion/body-part`.
+
+## Deploying to Render
+
+`render.yaml` in this folder is a [Render Blueprint](https://render.com/docs/blueprint-spec)
+for this service — connect the repo in the Render dashboard and it picks up the build/start
+commands and health check automatically. Then fill in the env vars it declares (all `sync: false`,
+so Render prompts for them instead of committing values):
+
+- Same list as above (`GEMINI_API_KEY`, `VERTEX_*`, `GOOGLE_PLACES_API_KEY`, `SECRET_KEY` is
+  auto-generated, etc).
+- `GOOGLE_APPLICATION_CREDENTIALS` — don't paste key contents into a regular env var. Upload the
+  service-account JSON as a Render **Secret File** (Environment → Secret Files), then set this
+  var to the mount path Render gives it, e.g. `/etc/secrets/dermalyze-gcp.json`.
+- `DATABASE_URL` — Render's disk is ephemeral, so the SQLite fallback gets wiped on every deploy.
+  Provision a Postgres instance (Render's own, or any external one) before real users sign up, and
+  set this to its connection string.
+- `CORS_ALLOWED_ORIGINS` — set to the frontend's actual deployed origin once it has one (not `*`)
+  so only that origin can call the API.
+
+Once deployed, point the frontend at it — see `frontend/README.md`.

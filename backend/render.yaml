@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: dermalyze-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: VERTEX_PROJECT_ID
+        sync: false
+      - key: VERTEX_LOCATION
+        sync: false
+      - key: VERTEX_ENDPOINT_ID
+        sync: false
+      # Value should be the path Render mounts your service-account key at via
+      # a Secret File, e.g. /etc/secrets/dermalyze-gcp.json — see backend/README.md.
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "60"
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false

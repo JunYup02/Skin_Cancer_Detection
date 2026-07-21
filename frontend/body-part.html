@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dermalyze — Where is the lesion?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-frame">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" data-nav-back="dashboard.html" aria-label="Go back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <img class="topbar-logo" src="assets/images/logo.png" alt="">
+        <span class="topbar-title">Dermalyze</span>
+      </div>
+      <button class="avatar-btn" data-account-btn aria-label="Account">
+        <span class="material-symbols-outlined">account_circle</span>
+      </button>
+    </header>
+
+    <main class="screen" style="padding-bottom: 100px;">
+      <div class="stepper">
+        <div class="stepper-row">
+          <span class="text-label-md text-primary uppercase-label">Step 1 of 3 — Body part</span>
+          <span class="text-label-sm text-outline">33%</span>
+        </div>
+        <div class="stepper-track"><div class="stepper-fill" style="width: 33%;"></div></div>
+      </div>
+
+      <div>
+        <h1 class="text-headline-md" style="margin:0 0 6px;">Where is the lesion located?</h1>
+        <p class="text-body-md text-on-surface-variant">Selecting the correct body part and side helps the model read the photo in context.</p>
+      </div>
+
+      <div class="toggle-pill">
+        <button type="button" id="front-view-btn" class="active">Front</button>
+        <button type="button" id="back-view-btn">Back</button>
+      </div>
+
+      <div id="regions-state" class="state-panel">
+        <div class="spinner" style="border-color: color-mix(in srgb, var(--outline) 30%, transparent); border-top-color: var(--outline);"></div>
+        <p>Loading body regions…</p>
+      </div>
+
+      <div id="regions-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+      <div id="body-part-error" class="banner banner-error hidden">
+        <span class="material-symbols-outlined">error</span>
+        <span></span>
+      </div>
+    </main>
+
+    <footer style="position: sticky; bottom: 0; background: var(--surface-container-lowest); border-top: 1px solid var(--outline-variant); padding: 16px; display:flex; gap:12px;">
+      <a href="dashboard.html" class="btn btn-outline" style="flex:1;">Cancel</a>
+      <button id="next-step-btn" class="btn btn-primary" style="flex: 2;" disabled>Next: Upload photo</button>
+    </footer>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/body-part.js"></script>
+</body>
+</html>

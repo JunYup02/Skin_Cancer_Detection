@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dermalyze — Create your profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-frame">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" data-nav-back="index.html" aria-label="Go back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <img class="topbar-logo" src="assets/images/logo.png" alt="">
+        <span class="topbar-title">Dermalyze</span>
+      </div>
+    </header>
+
+    <main class="screen screen-narrow">
+      <div style="text-align:center;">
+        <h1 class="text-headline-md" style="margin: 0 0 6px;">Create Your Profile</h1>
+        <p class="text-body-md text-on-surface-variant">Secure access to your skin assessments</p>
+      </div>
+
+      <div class="card">
+        <div id="signup-error" class="banner banner-error hidden" style="margin-bottom: 16px;">
+          <span class="material-symbols-outlined">error</span>
+          <span></span>
+        </div>
+
+        <form id="signup-form" novalidate style="display:flex; flex-direction:column; gap:18px;">
+          <div class="field">
+            <label for="full-name">Full name</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">badge</span>
+              <input id="full-name" type="text" placeholder="Enter your full name" autocomplete="name" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="username">Username</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">person</span>
+              <input id="username" type="text" placeholder="Choose a username" autocomplete="username" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="age">Age</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">calendar_today</span>
+              <input id="age" type="number" min="1" max="120" placeholder="Age" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap has-trailing">
+              <span class="material-symbols-outlined">lock</span>
+              <input id="password" type="password" placeholder="Create a password" autocomplete="new-password" required>
+              <button class="input-trailing-btn toggle-password" type="button" aria-label="Show password">
+                <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="confirm-password">Confirm password</label>
+            <div class="input-wrap has-trailing">
+              <span class="material-symbols-outlined">lock_clock</span>
+              <input id="confirm-password" type="password" placeholder="Re-enter your password" autocomplete="new-password" required>
+              <button class="input-trailing-btn toggle-password" type="button" aria-label="Show password">
+                <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Gender identity</label>
+            <div class="segmented" data-cols="3">
+              <button type="button" class="sex-btn" data-sex="female">Female</button>
+              <button type="button" class="sex-btn" data-sex="male">Male</button>
+              <button type="button" class="sex-btn" data-sex="prefer_not_to_say">Prefer not to say</button>
+            </div>
+            <input type="hidden" id="sex-input">
+          </div>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="agree-terms" required>
+            <label for="agree-terms">I agree to the Terms of Service and Privacy Policy</label>
+          </div>
+
+          <button class="btn btn-primary btn-block" type="submit" style="margin-top: 4px;">
+            Create account
+            <span class="material-symbols-outlined" style="font-size:18px;">chevron_right</span>
+          </button>
+        </form>
+
+        <div class="auth-footer" style="margin-top: 24px; text-align:center; font-size: 14px; color: var(--on-surface-variant);">
+          Already have an account?
+          <a href="index.html" style="color: var(--primary); font-weight: 700; text-decoration: none;">Log in here</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
