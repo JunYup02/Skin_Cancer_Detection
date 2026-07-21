@@ -29,8 +29,10 @@ def _get_client():
 
 
 def classify(image: Image.Image) -> list[ClassPrediction]:
-    from google.cloud.aiplatform.gapic.schema import predict as predict_schema
-
+    # Checked before the google-cloud-aiplatform import below: that import pulls in
+    # grpc/protobuf and is heavy enough to risk OOM-killing small instances (e.g.
+    # Render's free tier), so fail fast and cheap when Vertex isn't configured at all
+    # instead of paying for the import just to immediately error out.
     missing = [name for name in REQUIRED_ENV_VARS if not os.environ.get(name)]
     if missing:
         raise HTTPException(
@@ -40,6 +42,8 @@ def classify(image: Image.Image) -> list[ClassPrediction]:
                 f"{', '.join(missing)}. Set these once a model is deployed to an endpoint."
             ),
         )
+
+    from google.cloud.aiplatform.gapic.schema import predict as predict_schema
 
     buffer = io.BytesIO()
     image.convert("RGB").save(buffer, format="JPEG")
