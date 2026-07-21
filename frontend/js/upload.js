@@ -89,11 +89,15 @@ analyzeBtn.addEventListener("click", async () => {
     }
     window.location.href = "results.html";
   } catch (err) {
-    if (err.status === 502) {
+    if (err.status === 503) {
+      // Vertex env vars aren't set at all yet — expected until a model is deployed.
       showBanner(
         errorEl,
-        "The analysis model isn't connected yet — once a Vertex AI endpoint is deployed and VERTEX_ENDPOINT_ID is set on the backend, this will work automatically. (" + err.message + ")"
+        "The analysis model isn't connected yet. Once a Vertex AI endpoint is deployed and its project/location/endpoint ID are set on the backend, this will work automatically."
       );
+    } else if (err.status === 502) {
+      // Env vars are set, but the actual Vertex AI call failed (bad endpoint, auth, quota, etc).
+      showBanner(errorEl, "The analysis model is connected but the prediction failed: " + err.message);
     } else {
       showBanner(errorEl, err.message);
     }

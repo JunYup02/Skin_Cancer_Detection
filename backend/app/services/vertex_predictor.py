@@ -15,6 +15,8 @@ from PIL import Image
 
 from app.schemas.gemini_report import ClassPrediction
 
+REQUIRED_ENV_VARS = ("VERTEX_PROJECT_ID", "VERTEX_LOCATION", "VERTEX_ENDPOINT_ID")
+
 
 @lru_cache
 def _get_client():
@@ -28,6 +30,16 @@ def _get_client():
 
 def classify(image: Image.Image) -> list[ClassPrediction]:
     from google.cloud.aiplatform.gapic.schema import predict as predict_schema
+
+    missing = [name for name in REQUIRED_ENV_VARS if not os.environ.get(name)]
+    if missing:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Vertex AI endpoint isn't configured yet — missing env var(s): "
+                f"{', '.join(missing)}. Set these once a model is deployed to an endpoint."
+            ),
+        )
 
     buffer = io.BytesIO()
     image.convert("RGB").save(buffer, format="JPEG")
