@@ -586,6 +586,28 @@ button { font-family: inherit; }
 .risk-pill.moderate { background: var(--risk-moderate-bg); color: var(--risk-moderate-fg); }
 .risk-pill.high { background: var(--risk-high-bg); color: var(--risk-high-fg); }
 
+.detect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.detect-card {
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-1);
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.detect-card .detect-icon {
+  width: 34px; height: 34px; border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--primary-container) 20%, transparent);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.detect-card .detect-icon.detect-icon-danger {
+  background: var(--error-container);
+  color: var(--error);
+}
+.detect-card h4 { margin: 4px 0 0; font-size: 14px; font-weight: 700; color: var(--on-surface); }
+.detect-card p { margin: 0; font-size: 12.5px; color: var(--on-surface-variant); line-height: 1.4; }
+
 .tip-card {
   display: flex; gap: 12px; align-items: flex-start;
   background: var(--surface-container-low);
