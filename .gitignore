@@ -11,6 +11,7 @@ venv/
 
 # Env
 .env
+backend/secrets/
 
 # OS
 .DS_Store
