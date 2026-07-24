@@ -18,8 +18,7 @@ const CLASS_LABEL = {
   mel: "Melanoma", bcc: "Basal Cell Carcinoma", akiec: "Actinic Keratosis / Intraepithelial Carcinoma",
   bkl: "Benign Keratosis-like Lesion", nv: "Melanocytic Nevus", vasc: "Vascular Lesion", df: "Dermatofibroma",
 };
-const HIGH_RISK_CLASSES = ["mel"];
-const MODERATE_RISK_CLASSES = ["bcc", "akiec"];
+const HIGH_RISK_CLASSES = ["mel", "bcc", "akiec"];
 
 (function showUrgentContextIfAny() {
   const raw = sessionStorage.getItem("dermalyze_result");
@@ -29,24 +28,18 @@ const MODERATE_RISK_CLASSES = ["bcc", "akiec"];
     const top = [...(data.predictions || [])].sort((a, b) => b.probability - a.probability)[0];
     if (!top) return;
     const key = (top.name || top.id || "").toLowerCase();
-    const risk = HIGH_RISK_CLASSES.includes(key) ? "high" : MODERATE_RISK_CLASSES.includes(key) ? "moderate" : null;
-    if (!risk) return;
+    if (!HIGH_RISK_CLASSES.includes(key)) return;
 
-    const bg = risk === "high" ? "var(--error-container)" : "var(--risk-moderate-bg)";
-    const fg = risk === "high" ? "var(--on-error-container)" : "var(--risk-moderate-fg)";
     const banner = document.getElementById("urgent-banner");
-    banner.style.background = bg;
+    banner.style.background = "var(--error-container)";
     banner.classList.remove("hidden");
     ["urgent-banner-icon", "urgent-banner-eyebrow", "urgent-banner-title", "urgent-banner-sub"].forEach((id) => {
-      document.getElementById(id).style.color = fg;
+      document.getElementById(id).style.color = "var(--on-error-container)";
     });
-    document.getElementById("urgent-banner-icon").textContent = risk === "high" ? "emergency" : "priority_high";
-    document.getElementById("urgent-banner-eyebrow").textContent = risk === "high" ? "Urgent attention needed" : "Attention recommended";
-    document.getElementById("urgent-banner-title").textContent = `Possible ${CLASS_LABEL[key] || "finding"} — ${risk === "high" ? "High" : "Moderate"} risk`;
-    document.getElementById("urgent-banner-sub").textContent =
-      risk === "high"
-        ? "We recommend seeing a dermatologist within 1-2 weeks."
-        : "Professional evaluation is recommended when convenient.";
+    document.getElementById("urgent-banner-icon").textContent = "emergency";
+    document.getElementById("urgent-banner-eyebrow").textContent = "Urgent attention needed";
+    document.getElementById("urgent-banner-title").textContent = `Possible ${CLASS_LABEL[key] || "finding"} — High risk`;
+    document.getElementById("urgent-banner-sub").textContent = "We recommend seeing a dermatologist within 1-2 weeks.";
   } catch {
     /* ignore malformed session data */
   }

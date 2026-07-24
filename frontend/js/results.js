@@ -5,16 +5,15 @@ requireAuth();
  * trained on (see Dermalyze_data/undersampling). Keyed by the lowercased
  * class `name` the backend returns (ClassPrediction.name = AutoML displayName).
  *
- * mel (melanoma) is the acutely dangerous one -> high.
- * bcc (basal cell carcinoma) and akiec (actinic keratosis / early
- * intraepithelial carcinoma) are malignant/pre-malignant but typically
- * slower-growing and rarely fatal if caught -> moderate.
- * nv, bkl, vasc, df are benign -> low.
+ * mel (melanoma), bcc (basal cell carcinoma), and akiec (actinic keratosis /
+ * early intraepithelial carcinoma) are malignant/pre-malignant -> high.
+ * nv, bkl, vasc, df are benign -> low. Two tiers only (no "moderate") --
+ * a finding is either something to get checked promptly, or not.
  */
 const CLASS_INFO = {
   mel: { label: "Melanoma", risk: "high" },
-  bcc: { label: "Basal Cell Carcinoma", risk: "moderate" },
-  akiec: { label: "Actinic Keratosis / Intraepithelial Carcinoma", risk: "moderate" },
+  bcc: { label: "Basal Cell Carcinoma", risk: "high" },
+  akiec: { label: "Actinic Keratosis / Intraepithelial Carcinoma", risk: "high" },
   bkl: { label: "Benign Keratosis-like Lesion", risk: "low" },
   nv: { label: "Melanocytic Nevus", risk: "low" },
   vasc: { label: "Vascular Lesion", risk: "low" },
@@ -23,22 +22,13 @@ const CLASS_INFO = {
 
 const RISK_COPY = {
   high: {
-    pill: "High risk skin disease",
+    pill: "High-risk lesion",
     icon: "warning",
     subtitle: "High risk of malignancy detected. Immediate specialist consultation is recommended.",
     printLabel: "Download urgent clinical report",
   },
-  moderate: {
-    pill: "Moderate-risk pattern",
-    icon: "priority_high",
-    subtitle: "We recommend a professional evaluation for this finding.",
-    ctaVariant: "btn-primary",
-    ctaIcon: "calendar_month",
-    ctaLabel: "Book a professional review",
-    printLabel: "Download PDF report",
-  },
   low: {
-    pill: "Lower-risk pattern",
+    pill: "Lower-risk lesion",
     icon: "check_circle",
     subtitle: "Non-concerning visual patterns detected.",
     ctaVariant: "btn-outline",
@@ -80,8 +70,8 @@ function render(data) {
   if (data.isDemo) {
     const demoBanner = document.createElement("div");
     demoBanner.className = "banner";
-    demoBanner.style.background = "var(--risk-moderate-bg)";
-    demoBanner.style.color = "var(--risk-moderate-fg)";
+    demoBanner.style.background = "var(--notice-bg)";
+    demoBanner.style.color = "var(--notice-fg)";
     demoBanner.innerHTML = `
       <span class="material-symbols-outlined">science</span>
       <span>Demo data — the Vertex AI model isn't connected yet, so this is placeholder output, not a real analysis.</span>
@@ -92,7 +82,6 @@ function render(data) {
   const sorted = [...data.predictions].sort((a, b) => b.probability - a.probability);
   const top = sorted[0];
   const info = classInfo(top);
-  const pct = Math.round(top.probability * 100);
   const risk = info.risk;
   const refCode = data.refCode || makeRefCode();
 
@@ -104,7 +93,7 @@ function render(data) {
   }
   document.getElementById("result-region-label").textContent = data.bodyPart?.label || "—";
 
-  document.getElementById("result-classification").textContent = `${info.label} — ${pct}%`;
+  document.getElementById("result-classification").textContent = info.label;
   document.getElementById("result-subtitle").textContent = RISK_COPY[risk].subtitle;
   document.getElementById("result-ref").textContent = `Ref: #${refCode}`;
 
@@ -127,17 +116,13 @@ function render(data) {
   document.getElementById("texture-note").textContent = data.texture_note || "Not available.";
   document.getElementById("pigment-note").textContent = data.pigment_note || "Not available.";
 
-  // On-screen candidate ranking is intentionally left off the summary card (it's in
-  // the PDF report instead) -- keep the sorted list around for downloadPdfReport.
-  const others = sorted.slice(1, 5);
-
   if (risk === "high") {
     // High risk: search automatically instead of a manual CTA. No generic
     // "find a clinic" button here -- the inline results below are the whole UI.
     document.getElementById("auto-clinics").classList.remove("hidden");
     autoFetchNearbyClinics();
   } else {
-    // Moderate: a calmer teal prompt. Low: still offered, just not urgent (outline).
+    // Low risk: still offered, just not urgent (outline button).
     const cta = document.getElementById("clinic-cta");
     cta.classList.remove("hidden", "btn-primary", "btn-outline");
     cta.classList.add(RISK_COPY[risk].ctaVariant);
@@ -147,7 +132,7 @@ function render(data) {
 
   document.getElementById("print-btn-label").textContent = RISK_COPY[risk].printLabel;
   document.getElementById("print-btn").addEventListener("click", () =>
-    downloadPdfReport(data, { info, pct, risk, refCode, others })
+    downloadPdfReport(data, { info, risk, refCode })
   );
 
   // Save this completed analysis into the (local, per-browser) scan history so it
@@ -274,7 +259,7 @@ function pdfImageFormat(dataUrl) {
   return ext === "jpg" ? "JPEG" : ext.toUpperCase();
 }
 
-async function downloadPdfReport(data, { info, pct, risk, refCode, others }) {
+async function downloadPdfReport(data, { info, risk, refCode }) {
   const btn = document.getElementById("print-btn");
   setButtonBusy(btn, true, "Preparing PDF…");
   try {
@@ -343,7 +328,7 @@ async function downloadPdfReport(data, { info, pct, risk, refCode, others }) {
     }
 
     paragraph(`Region: ${data.bodyPart?.label || "—"}`, 12);
-    paragraph(`Classification: ${info.label} (${pct}%)`, 12);
+    paragraph(`Classification: ${info.label}`, 12);
     paragraph(`Risk tier: ${risk.charAt(0).toUpperCase() + risk.slice(1)} risk`, 12);
     if (data.isDemo) {
       doc.setTextColor(180, 100, 20);
@@ -360,15 +345,6 @@ async function downloadPdfReport(data, { info, pct, risk, refCode, others }) {
 
     heading("Pigment", 13);
     paragraph(data.pigment_note || "Not available.");
-
-    if (others?.length) {
-      heading("Other candidates considered", 13);
-      others.forEach((p) => {
-        const otherInfo = classInfo(p);
-        const otherPct = Math.round(p.probability * 100);
-        paragraph(`${otherInfo.label} — ${otherPct}%`, 11);
-      });
-    }
 
     rule();
     doc.setFontSize(9);

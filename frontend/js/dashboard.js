@@ -9,7 +9,7 @@ const listEl = document.getElementById("activity-list");
 const emptyEl = document.getElementById("activity-empty");
 const seeAllBtn = document.getElementById("see-all-btn");
 
-const STATUS_BY_RISK = { low: "Stable", moderate: "Monitor", high: "Review" };
+const STATUS_BY_RISK = { low: "Stable", high: "Review" };
 
 statScans.textContent = history.length;
 if (history.length) {

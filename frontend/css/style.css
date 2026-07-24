@@ -61,13 +61,15 @@
   --shadow-1: 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-2: 0 6px 12px rgba(0, 0, 0, 0.10);
 
-  /* --- semantic risk colors (Low / Moderate / High) --- */
+  /* --- semantic risk colors (Low / High) --- */
   --risk-low-bg: #e1f0e5;
   --risk-low-fg: #1e6b3a;
-  --risk-moderate-bg: #fdead2;
-  --risk-moderate-fg: #8a4a10;
   --risk-high-bg: var(--error-container);
   --risk-high-fg: var(--on-error-container);
+
+  /* --- notice color (e.g. "this is demo data" banners; not a risk tier) --- */
+  --notice-bg: #fdead2;
+  --notice-fg: #8a4a10;
 
   /* --- type scale --- */
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -600,7 +602,6 @@ button { font-family: inherit; }
   white-space: nowrap;
 }
 .risk-pill.low { background: var(--risk-low-bg); color: var(--risk-low-fg); }
-.risk-pill.moderate { background: var(--risk-moderate-bg); color: var(--risk-moderate-fg); }
 .risk-pill.high { background: var(--risk-high-bg); color: var(--risk-high-fg); }
 
 .detect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
