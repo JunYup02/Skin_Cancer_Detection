@@ -65,14 +65,15 @@ language, even if it feels more natural for the content.
 1. report: 3-5 sentences in English. Explain the predicted condition in plain language and suggest a
    recommended next step (e.g. whether an in-person visit is warranted). The final sentence must state
    that this is a reference-only AI analysis, not a medical diagnosis.
-2. texture_note: One sentence in English on the lesion's border/texture as actually observed in the
-   image (e.g. whether the border is smooth or irregular, symmetric or not). Describe only what is
-   actually visible in the image.
+2.  self_care: 3-5 sentences in English with practical, general self-care and monitoring guidance for a
+   low-risk skin lesion like this one (e.g. sun protection, moisturizing, avoiding irritation/picking, and
+   what changes in size, shape, color, or symptoms -- such as bleeding or itching -- should prompt seeing a
+   doctor). Keep it general safety advice, not a prescribed treatment, and do not contradict the
+   reference-only nature of this analysis.
 3. pigment_note: One sentence in English on the lesion's color/pigment distribution as actually
    observed in the image (e.g. a single tone vs. multiple colors mixed together). Describe only what is
    actually visible in the image.
 
-Reminder: report, texture_note, and pigment_note must all be in English.
 """
 
 SELF_CARE_ADDENDUM = """
@@ -80,13 +81,11 @@ SELF_CARE_ADDENDUM = """
 The AI classification for this lesion falls in the low-risk (benign-leaning) tier. In addition to the
 three fields above, also write a fourth field:
 
-4. self_care: 3-5 sentences in English with practical, general self-care and monitoring guidance for a
-   low-risk skin lesion like this one (e.g. sun protection, moisturizing, avoiding irritation/picking, and
-   what changes in size, shape, color, or symptoms -- such as bleeding or itching -- should prompt seeing a
-   doctor). Keep it general safety advice, not a prescribed treatment, and do not contradict the
-   reference-only nature of this analysis.
+4. texture_note: One sentence in English on the lesion's border/texture as actually observed in the
+   image (e.g. whether the border is smooth or irregular, symmetric or not). Describe only what is
+   actually visible in the image.
 
-Reminder: self_care must also be in English only, with no percentages or probability figures."""
+Reminder:  report, texture_note, and pigment_note, self_care must also be in English only, with no percentages or probability figures."""
 
 
 class GeminiAnalysis(BaseModel):
