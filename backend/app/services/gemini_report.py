@@ -4,6 +4,7 @@ Requires the GEMINI_API_KEY env var (get one at https://aistudio.google.com/apik
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -15,7 +16,15 @@ from pydantic import BaseModel
 
 from app.schemas.gemini_report import ClassPrediction
 
-MODEL_NAME = "gemini-3.5-flash"
+# gemini-3.5-flash was tried briefly for better English-enforcement, but its capacity is
+# prone to 503 UNAVAILABLE ("high demand") under load -- gemini-2.5-flash is the proven
+# stable model for this endpoint, so the Hangul/percentage retry below (which predates
+# the 3.5 experiment) does the enforcement work instead.
+MODEL_NAME = "gemini-2.5-flash"
+
+# Matches any Hangul syllable/jamo -- used to detect Korean slipping into a response
+# despite the English-only instruction, so we can retry once with a firmer prompt.
+HANGUL_RE = re.compile(r"[가-힣ᄀ-ᇿ㄰-㆏]")
 
 # The classification model returns short HAM10000 codes (e.g. "nv"), not names --
 # expand to a full name here so Gemini always gets (and can use) the real disease
@@ -87,6 +96,12 @@ three fields above, also write a fourth field:
 
 Reminder:  report, texture_note, and pigment_note, self_care must also be in English only, with no percentages or probability figures."""
 
+RETRY_SUFFIX = """
+
+Your previous answer violated the rules above (it contained Korean text and/or a percentage). Write the
+fields again from scratch, in English only, with zero Korean characters and zero numbers standing
+for probabilities or percentages."""
+
 
 class GeminiAnalysis(BaseModel):
     report: str
@@ -111,6 +126,27 @@ def _get_client() -> genai.Client:
     return genai.Client()
 
 
+def _violates_language_rules(analysis: GeminiAnalysis) -> bool:
+    combined = " ".join(v for v in analysis.model_dump().values() if isinstance(v, str))
+    return bool(HANGUL_RE.search(combined) or "%" in combined)
+
+
+def _call_gemini(image: Image.Image, prompt: str, schema: type[GeminiAnalysis]) -> GeminiAnalysis:
+    try:
+        response = _get_client().models.generate_content(
+            model=MODEL_NAME,
+            contents=[image, prompt],
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION,
+                response_mime_type="application/json",
+                response_schema=schema,
+            ),
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Gemini report generation failed: {exc}") from exc
+    return response.parsed
+
+
 def generate_report(predictions: list[ClassPrediction], image: Image.Image) -> ReportResult:
     top = max(predictions, key=lambda p: p.probability)
     risk = RISK_BY_CLASS.get(top.name, "low")
@@ -125,20 +161,12 @@ def generate_report(predictions: list[ClassPrediction], image: Image.Image) -> R
         prompt += SELF_CARE_ADDENDUM
         schema = GeminiAnalysisWithSelfCare
 
-    try:
-        response = _get_client().models.generate_content(
-            model=MODEL_NAME,
-            contents=[image, prompt],
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                response_mime_type="application/json",
-                response_schema=schema,
-            ),
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Gemini report generation failed: {exc}") from exc
+    analysis = _call_gemini(image, prompt, schema)
+    if _violates_language_rules(analysis):
+        # gemini-2.5-flash occasionally ignores the system_instruction on the first pass --
+        # one retry with an explicit callout of the violation reliably fixes it in practice.
+        analysis = _call_gemini(image, prompt + RETRY_SUFFIX, schema)
 
-    analysis = response.parsed
     return ReportResult(
         report=analysis.report,
         texture_note=analysis.texture_note,
