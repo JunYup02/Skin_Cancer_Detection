@@ -259,6 +259,26 @@ function pdfImageFormat(dataUrl) {
   return ext === "jpg" ? "JPEG" : ext.toUpperCase();
 }
 
+// Brand palette for the PDF, lifted from the design tokens in css/style.css so the
+// export doesn't look like a different product from the app around it.
+const PDF_COLOR = {
+  primary: [0, 106, 99], // --primary
+  onSurface: [23, 29, 28], // --on-surface
+  onSurfaceVariant: [61, 73, 71], // --on-surface-variant
+  outlineVariant: [188, 201, 199], // --outline-variant
+  cardBg: [239, 245, 243], // --surface-container-low
+  muted: [110, 122, 119],
+};
+const PDF_RISK_COLOR = {
+  low: { bg: [225, 240, 229], fg: [30, 107, 58] }, // --risk-low-bg/fg
+  high: { bg: [255, 218, 214], fg: [147, 0, 10] }, // --risk-high-bg/fg
+};
+const PDF_NOTICE_COLOR = { bg: [253, 234, 210], fg: [138, 74, 16] }; // --notice-bg/fg
+
+// Note: percentages are intentionally never rendered anywhere in this PDF -- the
+// model's confidence score isn't shown to avoid implying false precision -- and every
+// text field going in (report/texture_note/pigment_note/self_care) is already
+// constrained to English-only by the backend prompt in app/services/gemini_report.py.
 async function downloadPdfReport(data, { info, risk, refCode }) {
   const btn = document.getElementById("print-btn");
   setButtonBusy(btn, true, "Preparing PDF…");
@@ -285,70 +305,121 @@ async function downloadPdfReport(data, { info, risk, refCode }) {
         y = margin;
       }
     }
-    function heading(text, size) {
-      ensureSpace(size * 1.4);
-      doc.setFontSize(size);
-      doc.text(text, margin, y);
-      y += size * 1.4;
-    }
-    function paragraph(text, size = 11) {
-      doc.setFontSize(size);
-      const lines = doc.splitTextToSize(text, contentWidth);
-      ensureSpace(lines.length * size * 1.5 + 10);
-      doc.text(lines, margin, y);
-      y += lines.length * size * 1.5 + 10;
-    }
-    function rule() {
-      ensureSpace(18);
-      doc.setDrawColor(220, 220, 220);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 18;
+    function resetInk() {
+      doc.setTextColor(...PDF_COLOR.onSurface);
+      doc.setDrawColor(...PDF_COLOR.outlineVariant);
     }
 
-    heading("Dermalyze Analysis Report — Full Detail", 20);
+    // A titled, shaded card with a colored accent bar -- used for every prose section
+    // so the report reads as distinct blocks instead of one long column of paragraphs.
+    function sectionCard(title, bodyText, accent = PDF_COLOR.primary) {
+      const paddingX = 16;
+      const paddingV = 14;
+      const titleSize = 11.5;
+      const bodySize = 10.5;
+      const bodyLineHeight = bodySize * 1.45;
+
+      doc.setFontSize(bodySize);
+      const lines = doc.splitTextToSize(bodyText, contentWidth - paddingX * 2);
+      const cardH = paddingV * 2 + titleSize * 1.3 + lines.length * bodyLineHeight;
+
+      ensureSpace(cardH + 14);
+      doc.setFillColor(...PDF_COLOR.cardBg);
+      doc.roundedRect(margin, y, contentWidth, cardH, 8, 8, "F");
+      doc.setFillColor(...accent);
+      doc.roundedRect(margin, y, 4, cardH, 2, 2, "F");
+
+      doc.setFontSize(titleSize);
+      doc.setTextColor(...PDF_COLOR.onSurface);
+      doc.text(title, margin + paddingX, y + paddingV + titleSize * 0.8);
+
+      doc.setFontSize(bodySize);
+      doc.setTextColor(...PDF_COLOR.onSurfaceVariant);
+      doc.text(lines, margin + paddingX, y + paddingV + titleSize * 1.3 + bodySize * 0.9);
+
+      y += cardH + 14;
+      resetInk();
+    }
+
+    // ---- Header band ----
+    const headerH = 84;
+    doc.setFillColor(...PDF_COLOR.primary);
+    doc.rect(0, 0, pageWidth, headerH, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.text("Dermalyze — AI Skin Analysis Report", margin, 36);
     doc.setFontSize(10);
-    doc.setTextColor(120, 120, 120);
-    doc.text(`${new Date().toLocaleString()}  ·  Ref: #${refCode}`, margin, y);
-    doc.setTextColor(0, 0, 0);
-    y += 24;
-    rule();
+    doc.setTextColor(210, 232, 229);
+    doc.text(`${new Date().toLocaleString()}   ·   Ref #${refCode}`, margin, 56);
+    resetInk();
+    y = headerH + 26;
 
-    // The analyzed photo, so the report is self-contained without the app open.
+    // ---- Photo ----
     if (data.imageDataUrl) {
       try {
-        const imgW = 160;
-        const imgH = 160;
-        ensureSpace(imgH + 12);
+        const imgW = 150;
+        const imgH = 150;
+        ensureSpace(imgH + 14);
+        doc.setDrawColor(...PDF_COLOR.outlineVariant);
+        doc.roundedRect(margin - 1, y - 1, imgW + 2, imgH + 2, 6, 6, "S");
         doc.addImage(data.imageDataUrl, pdfImageFormat(data.imageDataUrl), margin, y, imgW, imgH);
-        y += imgH + 12;
+        y += imgH + 18;
       } catch {
         // Some browsers hand back an image format jsPDF can't decode -- the report
         // is still useful without the photo, so skip it rather than fail the export.
       }
     }
 
-    paragraph(`Region: ${data.bodyPart?.label || "—"}`, 12);
-    paragraph(`Classification: ${info.label}`, 12);
-    paragraph(`Risk tier: ${risk.charAt(0).toUpperCase() + risk.slice(1)} risk`, 12);
+    // ---- Risk badge + classification ----
+    const riskColors = PDF_RISK_COLOR[risk] || PDF_RISK_COLOR.low;
+    const riskLabel = `${risk.toUpperCase()} RISK`;
+    doc.setFontSize(10);
+    const badgeW = doc.getTextWidth(riskLabel) + 26;
+    const badgeH = 21;
+    ensureSpace(badgeH + 8);
+    doc.setFillColor(...riskColors.bg);
+    doc.roundedRect(margin, y, badgeW, badgeH, badgeH / 2, badgeH / 2, "F");
+    doc.setTextColor(...riskColors.fg);
+    doc.text(riskLabel, margin + 13, y + badgeH / 2 + 3.5);
+    resetInk();
+    y += badgeH + 16;
+
+    doc.setFontSize(16);
+    doc.text(info.label, margin, y);
+    y += 18;
+    doc.setFontSize(10.5);
+    doc.setTextColor(...PDF_COLOR.muted);
+    doc.text(`Region: ${data.bodyPart?.label || "—"}`, margin, y);
+    resetInk();
+    y += 22;
+
     if (data.isDemo) {
-      doc.setTextColor(180, 100, 20);
-      paragraph("This is placeholder demo output — no Vertex AI model was connected when it was generated.", 10);
-      doc.setTextColor(0, 0, 0);
+      const demoText = "This is placeholder demo output — no Vertex AI model was connected when it was generated.";
+      doc.setFontSize(9.5);
+      const lines = doc.splitTextToSize(demoText, contentWidth - 24);
+      const boxH = 14 * 2 + lines.length * 13;
+      ensureSpace(boxH + 14);
+      doc.setFillColor(...PDF_NOTICE_COLOR.bg);
+      doc.roundedRect(margin, y, contentWidth, boxH, 6, 6, "F");
+      doc.setTextColor(...PDF_NOTICE_COLOR.fg);
+      doc.text(lines, margin + 12, y + 18);
+      resetInk();
+      y += boxH + 14;
     }
-    rule();
 
-    heading("Summary", 13);
-    paragraph(data.report || "No written summary was returned for this analysis.");
+    sectionCard("Summary", data.report || "No written summary was returned for this analysis.");
+    sectionCard("Texture", data.texture_note || "Not available.");
+    sectionCard("Pigment", data.pigment_note || "Not available.");
+    if (risk === "low" && data.self_care) {
+      sectionCard("Self-care tips", data.self_care, PDF_RISK_COLOR.low.fg);
+    }
 
-    heading("Texture", 13);
-    paragraph(data.texture_note || "Not available.");
-
-    heading("Pigment", 13);
-    paragraph(data.pigment_note || "Not available.");
-
-    rule();
+    ensureSpace(48);
+    doc.setDrawColor(...PDF_COLOR.outlineVariant);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 18;
     doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
+    doc.setTextColor(...PDF_COLOR.muted);
     const disclaimer = doc.splitTextToSize(
       "For reference only. This AI-generated analysis is for informational purposes only and is not a " +
         "clinical diagnosis. Always consult a licensed dermatologist for medical advice before making any " +

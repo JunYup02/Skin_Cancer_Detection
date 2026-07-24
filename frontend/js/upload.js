@@ -191,6 +191,7 @@ analyzeBtn.addEventListener("click", async () => {
           "The real analysis model (Vertex AI) isn't connected yet, so this is placeholder (demo) data. Once the endpoint is deployed, real analysis results will be shown here.",
         texture_note: "Demo data — not a result from real image analysis.",
         pigment_note: "Demo data — not a result from real image analysis.",
+        self_care: "Demo data — not a result from real image analysis.",
       };
       try {
         sessionStorage.setItem("dermalyze_result", JSON.stringify({ ...demoPayload, imageDataUrl: selectedDataUrl }));

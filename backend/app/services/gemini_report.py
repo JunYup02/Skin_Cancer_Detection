@@ -30,6 +30,19 @@ FULL_DISEASE_NAMES = {
     "vasc": "vascular lesion (angioma, angiokeratoma, pyogenic granuloma, or hemorrhage)",
 }
 
+# Mirrors the two-tier risk split in frontend/js/results.js (CLASS_INFO) -- keyed by the
+# same class `name` the backend returns (ClassPrediction.name = AutoML displayName).
+# Kept in sync manually since the frontend doesn't call back here.
+RISK_BY_CLASS = {
+    "mel": "high",
+    "bcc": "high",
+    "akiec": "high",
+    "bkl": "low",
+    "nv": "low",
+    "vasc": "low",
+    "df": "low",
+}
+
 # Set as both a system_instruction and repeated inline in the prompt itself --
 # belt and suspenders against the model matching some other language cue (e.g.
 # variable names, or just drifting) instead of the instruction.
@@ -62,6 +75,19 @@ language, even if it feels more natural for the content.
 Reminder: report, texture_note, and pigment_note must all be in English.
 """
 
+SELF_CARE_ADDENDUM = """
+
+The AI classification for this lesion falls in the low-risk (benign-leaning) tier. In addition to the
+three fields above, also write a fourth field:
+
+4. self_care: 3-5 sentences in English with practical, general self-care and monitoring guidance for a
+   low-risk skin lesion like this one (e.g. sun protection, moisturizing, avoiding irritation/picking, and
+   what changes in size, shape, color, or symptoms -- such as bleeding or itching -- should prompt seeing a
+   doctor). Keep it general safety advice, not a prescribed treatment, and do not contradict the
+   reference-only nature of this analysis.
+
+Reminder: self_care must also be in English only, with no percentages or probability figures."""
+
 
 class GeminiAnalysis(BaseModel):
     report: str
@@ -69,11 +95,16 @@ class GeminiAnalysis(BaseModel):
     pigment_note: str
 
 
+class GeminiAnalysisWithSelfCare(GeminiAnalysis):
+    self_care: str
+
+
 @dataclass
 class ReportResult:
     report: str
     texture_note: str
     pigment_note: str
+    self_care: str | None = None
 
 
 @lru_cache
@@ -83,8 +114,17 @@ def _get_client() -> genai.Client:
 
 def generate_report(predictions: list[ClassPrediction], image: Image.Image) -> ReportResult:
     top = max(predictions, key=lambda p: p.probability)
+    risk = RISK_BY_CLASS.get(top.name, "low")
     disease_name = FULL_DISEASE_NAMES.get(top.name, top.name)
+
     prompt = PROMPT_TEMPLATE.format(disease_name=disease_name)
+    schema = GeminiAnalysis
+    if risk == "low":
+        # Only ask for (and pay for) self-care guidance when the finding is low-risk --
+        # it's not relevant advice for a high-risk finding, which should point to a
+        # doctor instead.
+        prompt += SELF_CARE_ADDENDUM
+        schema = GeminiAnalysisWithSelfCare
 
     try:
         response = _get_client().models.generate_content(
@@ -93,15 +133,16 @@ def generate_report(predictions: list[ClassPrediction], image: Image.Image) -> R
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_INSTRUCTION,
                 response_mime_type="application/json",
-                response_schema=GeminiAnalysis,
+                response_schema=schema,
             ),
         )
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Gemini report generation failed: {exc}") from exc
 
-    analysis: GeminiAnalysis = response.parsed
+    analysis = response.parsed
     return ReportResult(
         report=analysis.report,
         texture_note=analysis.texture_note,
         pigment_note=analysis.pigment_note,
+        self_care=getattr(analysis, "self_care", None),
     )

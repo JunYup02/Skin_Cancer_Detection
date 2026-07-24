@@ -12,3 +12,4 @@ class GeminiReportResponse(BaseModel):
     report: str
     texture_note: str
     pigment_note: str
+    self_care: str | None = None

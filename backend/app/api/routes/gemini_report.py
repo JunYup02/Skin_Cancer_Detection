@@ -18,4 +18,5 @@ async def create_gemini_report(file: UploadFile = File(...)):
         report=result.report,
         texture_note=result.texture_note,
         pigment_note=result.pigment_note,
+        self_care=result.self_care,
     )
